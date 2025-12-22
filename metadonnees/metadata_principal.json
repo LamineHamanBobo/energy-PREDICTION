@@ -1,0 +1,101 @@
+{
+  "projet": "Prédiction de consommation énergétique",
+  "date_creation": "2025-12-18 08:21:19",
+  "auteur": "Pipeline de prétraitement automatisé",
+  "statistiques_initiales": {
+    "lignes_originales": 1200,
+    "colonnes_originales": 27,
+    "timestamp_min": "2025-07-01 00:00:00",
+    "timestamp_max": "2025-07-01 19:55:00",
+    "machines_uniques": 5
+  },
+  "probleme_type": "regression",
+  "target_variable": "energy_kWh",
+  "donnees_preparees": {
+    "X_train_shape": [
+      960,
+      56
+    ],
+    "X_test_shape": [
+      240,
+      56
+    ],
+    "y_train_shape": [
+      960
+    ],
+    "y_test_shape": [
+      240
+    ],
+    "features_count": 56,
+    "train_test_split": "80/20 (temporel)"
+  },
+  "preprocessing_applique": {
+    "nettoyage": {
+      "doublons_supprimes": 0,
+      "tri_temporel": "Oui"
+    },
+    "traitement_outliers": {
+      "energy_kWh": "winsorize_1%",
+      "voltage_V": "cap_380.0_420.0",
+      "current_A": "winsorize_1%",
+      "power_factor": "cap_0.8_1.0",
+      "frequency_Hz": "cap_49.5_50.5",
+      "machine_utilization_%": "cap_0.0_100.0",
+      "production_output_units": "winsorize_1%",
+      "ambient_temp_C": "winsorize_1%",
+      "humidity_%": "cap_0.0_100.0"
+    },
+    "feature_engineering": {
+      "nouvelles_features": 31,
+      "categories": [
+        "originales_scaled",
+        "ingenierie_scaled",
+        "temporelles_cycliques",
+        "aggregation_temporelle",
+        "encoded_variables",
+        "onehot_variables",
+        "contextuelles"
+      ]
+    },
+    "encodage": {
+      "label_encoding": [
+        "shift_type",
+        "energy_state",
+        "allocation_recommendation"
+      ],
+      "onehot_encoding": 21,
+      "frequency_encoding": []
+    },
+    "normalisation": {
+      "methode": "StandardScaler",
+      "variables_normalisees": 39
+    }
+  },
+  "fichiers_generes": {
+    "donnees_numeriques": [
+      "X_train.npy",
+      "X_test.npy",
+      "y_train.npy",
+      "y_test.npy",
+      "feature_names.txt"
+    ],
+    "donnees_csv": [
+      "train_data.csv",
+      "test_data.csv",
+      "donnees_completes.csv"
+    ],
+    "metadonnees": [
+      "metadata_principal.json",
+      "metadata_technique.json",
+      "guide_utilisation.md"
+    ],
+    "transformations": [
+      "scaler.pkl",
+      "label_encoders.pkl"
+    ],
+    "visualisations": [
+      "distributions_features.png",
+      "matrice_correlation.png"
+    ]
+  }
+}
