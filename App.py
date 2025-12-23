@@ -53,7 +53,8 @@ def load_lstm_model():
 model = load_lstm_model()
 if model is None:
     st.stop()
-model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+# Recompiler avec optimization=False pour éviter issues TF function caching
+model.compile(optimizer='adam', loss='mse', metrics=['mae'], jit_compile=False)
 
 
 # ================================
@@ -146,7 +147,7 @@ with tabs[1]:
         st.error(f"La série est trop courte ({len(energy_series)} < {TIMESTEPS}).")
         st.stop()
 
-    last_sequence = energy_series[-TIMESTEPS:].reshape(1, TIMESTEPS, FEATURES)
+    last_sequence = energy_series[-TIMESTEPS:].reshape(1, TIMESTEPS, FEATURES).astype(np.float32)
 
     # Horizon
     horizons = {
