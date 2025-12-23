@@ -1,0 +1,110 @@
+# ======================================================
+# CHAPITRE 3.1 – ÉTATS ÉNERGÉTIQUES
+# ======================================================
+
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+# ================================
+# 1. CHARGEMENT DES DONNÉES
+# ================================
+
+DATA_DIR = "donnees_numeriques"
+PRED_DIR = "predictions"
+
+# Données historiques (référence seuils)
+y_train = np.load(os.path.join(DATA_DIR, "y_train.npy")).flatten()
+
+# Prédictions multi-horizons
+predictions = {
+    "15_min": np.load(os.path.join(PRED_DIR, "predictions_15_min.npy")),
+    "1_heure": np.load(os.path.join(PRED_DIR, "predictions_1_heure.npy")),
+    "6_heures": np.load(os.path.join(PRED_DIR, "predictions_6_heures.npy")),
+    "24_heures": np.load(os.path.join(PRED_DIR, "predictions_24_heures.npy")),
+}
+
+print("✔ Données chargées avec succès")
+
+
+# ================================
+# 2. CALCUL DES SEUILS ÉNERGÉTIQUES
+# ================================
+
+low_threshold = np.percentile(y_train, 25)
+normal_threshold = np.percentile(y_train, 50)
+high_threshold = np.percentile(y_train, 75)
+
+print("\nSeuils énergétiques calculés :")
+print(f"Faible   < {low_threshold:.2f} kWh")
+print(f"Normal  < {normal_threshold:.2f} kWh")
+print(f"Élevé   < {high_threshold:.2f} kWh")
+print(f"Critique ≥ {high_threshold:.2f} kWh")
+
+
+# ================================
+# 3. FONCTION DE CLASSIFICATION DES ÉTATS
+# ================================
+
+def energy_state(value):
+    if value < low_threshold:
+        return "Faible 🟢"
+    elif value < normal_threshold:
+        return "Normale 🟡"
+    elif value < high_threshold:
+        return "Élevée 🟠"
+    else:
+        return "Critique 🔴"
+
+
+# ================================
+# 4. CALCUL DES ÉTATS POUR CHAQUE HORIZON
+# ================================
+
+states_by_horizon = {}
+
+for horizon, preds in predictions.items():
+    states = [energy_state(v) for v in preds]
+    states_by_horizon[horizon] = states
+    print(f"✔ États calculés pour {horizon}")
+
+
+# ================================
+# 5. MISE EN DATAFRAME
+# ================================
+
+energy_states_df = pd.DataFrame({
+    horizon: states
+    for horizon, states in states_by_horizon.items()
+})
+
+print("\nAperçu des états énergétiques :")
+print(energy_states_df.head())
+
+
+# ================================
+# 6. VISUALISATION DES ÉTATS (COMPTAGE)
+# ================================
+
+state_counts = energy_states_df.apply(pd.Series.value_counts)
+
+state_counts.plot(kind="bar", figsize=(10, 5))
+plt.title("Distribution des états énergétiques par horizon")
+plt.ylabel("Nombre d'occurrences")
+plt.show()
+
+
+# ================================
+# 7. SAUVEGARDE DES RÉSULTATS
+# ================================
+
+os.makedirs("etats_energetiques", exist_ok=True)
+
+energy_states_df.to_csv(
+    "etats_energetiques/energy_states_multi_horizon.csv",
+    index=False
+)
+
+print("✔ États énergétiques sauvegardés")
